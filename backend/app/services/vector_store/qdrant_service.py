@@ -38,3 +38,32 @@ class QdrantVectorStore:
         if not points:
             return
         self.client.upsert(collection_name=self.collection_name, points=points)
+
+    def search(
+        self,
+        query_vector: list[float],
+        top_k: int,
+        project_id: str,
+        document_ids: list[str] | None = None,
+    ) -> list[models.ScoredPoint]:
+        must_conditions: list[models.Condition] = [
+            models.FieldCondition(
+                key="project_id",
+                match=models.MatchValue(value=project_id),
+            )
+        ]
+        if document_ids:
+            must_conditions.append(
+                models.FieldCondition(
+                    key="document_id",
+                    match=models.MatchAny(any=document_ids),
+                )
+            )
+
+        return self.client.search(
+            collection_name=self.collection_name,
+            query_vector=query_vector,
+            query_filter=models.Filter(must=must_conditions),
+            limit=top_k,
+            with_payload=True,
+        )
