@@ -17,6 +17,11 @@ Phase 1 foundation baseline for a production-style Conversation Intelligence Pla
   - `POST /projects/{id}/documents/upload`
   - `GET /projects/{id}/documents`
   - `GET /documents/{id}`
+  - `POST /documents/{id}/process`
+  - `GET /documents/{id}/chunks`
+  - `POST /documents/{id}/index`
+  - `POST /documents/{id}/reindex`
+  - `GET /documents/{id}/index-status`
 
 ## Local run
 
@@ -78,6 +83,42 @@ Get a single document:
 curl "http://localhost:8000/documents/<DOCUMENT_ID>"
 ```
 
+### 5) Minimal processing flow check
+
+Process the uploaded document:
+
+```bash
+curl -X POST "http://localhost:8000/documents/<DOCUMENT_ID>/process"
+```
+
+List document chunks:
+
+```bash
+curl "http://localhost:8000/documents/<DOCUMENT_ID>/chunks"
+```
+
+Current processing supports only simple text-based files (`.txt`, `.md`, `.csv`, `.json`, `.log`, `.yaml`, `.yml`, `.html`).
+
+### 6) Minimal indexing flow check
+
+Index a processed document:
+
+```bash
+curl -X POST "http://localhost:8000/documents/<DOCUMENT_ID>/index"
+```
+
+Check index status:
+
+```bash
+curl "http://localhost:8000/documents/<DOCUMENT_ID>/index-status"
+```
+
+Reindex the document (removes old vectors before upsert):
+
+```bash
+curl -X POST "http://localhost:8000/documents/<DOCUMENT_ID>/reindex"
+```
+
 ## Environment
 
 Copy `backend/.env.example` to `backend/.env` for local overrides (optional when using default compose values).
@@ -85,5 +126,6 @@ Copy `backend/.env.example` to `backend/.env` for local overrides (optional when
 ## Current scope boundaries
 
 - No frontend yet
-- No processing/chunking/indexing/search/ask yet
-- Qdrant is provisioned but not used in this phase
+- No search/reranking/ask yet
+- No PDF/DOCX/XLSX parsing yet
+- Qdrant is used only for document chunk indexing in this phase

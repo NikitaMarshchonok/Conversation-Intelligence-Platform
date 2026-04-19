@@ -41,6 +41,8 @@ services:
       APP_PORT: 8000
       DATABASE_URL: postgresql+psycopg2://conversation:conversation@postgres:5432/conversation_db
       QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION_NAME: document_chunks
+      EMBEDDING_VECTOR_SIZE: 128
       UPLOAD_STORAGE_DIR: /app/storage/uploads
     ports:
       - "8000:8000"

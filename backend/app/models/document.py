@@ -24,6 +24,12 @@ class Document(Base):
     size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
     storage_path: Mapped[str] = mapped_column(String(1024), nullable=False, unique=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="uploaded", server_default="uploaded")
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    processing_error: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    chunk_count: Mapped[int] = mapped_column(nullable=False, default=0, server_default="0")
+    indexed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    indexing_error: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    is_indexed: Mapped[bool] = mapped_column(nullable=False, default=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -33,3 +39,4 @@ class Document(Base):
     )
 
     project = relationship("Project", back_populates="documents")
+    chunks = relationship("DocumentChunk", back_populates="document", cascade="all, delete-orphan")
