@@ -23,6 +23,7 @@ Phase 1 foundation baseline for a production-style Conversation Intelligence Pla
   - `POST /documents/{id}/reindex`
   - `GET /documents/{id}/index-status`
   - `POST /search`
+  - `POST /ask`
 
 ## Local run
 
@@ -147,6 +148,38 @@ curl -X POST "http://localhost:8000/search" \
   }'
 ```
 
+### 8) Minimal grounded ask flow check
+
+Ask a grounded question over retrieved chunks:
+
+```bash
+curl -X POST "http://localhost:8000/ask" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What does this project currently support?",
+    "project_id": "<PROJECT_ID>",
+    "top_k": 5
+  }'
+```
+
+Ask with optional document filter:
+
+```bash
+curl -X POST "http://localhost:8000/ask" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What indexing behavior is implemented?",
+    "project_id": "<PROJECT_ID>",
+    "top_k": 5,
+    "document_ids": ["<DOCUMENT_ID>"]
+  }'
+```
+
+The ask response includes:
+- `answer`
+- `citations[]`
+- `supporting_results[]`
+
 ## Environment
 
 Copy `backend/.env.example` to `backend/.env` for local overrides (optional when using default compose values).
@@ -154,6 +187,7 @@ Copy `backend/.env.example` to `backend/.env` for local overrides (optional when
 ## Current scope boundaries
 
 - No frontend yet
-- No reranking/ask yet
+- No reranking yet
+- No feedback/metrics yet
 - No PDF/DOCX/XLSX parsing yet
 - Qdrant is used only for document chunk indexing in this phase
