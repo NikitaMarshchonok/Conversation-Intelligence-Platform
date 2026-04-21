@@ -25,7 +25,14 @@ class AskSupportingResult(BaseModel):
     content: str
 
 
+class AskResultOrderItem(BaseModel):
+    chunk_id: UUID
+    position: int
+
+
 class AskResponse(BaseModel):
     answer: str
     citations: list[AskCitation]
     supporting_results: list[AskSupportingResult]
+    retrieved_order: list[AskResultOrderItem] | None = None
+    reranked_order: list[AskResultOrderItem] | None = None

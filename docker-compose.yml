@@ -44,6 +44,7 @@ services:
       QDRANT_COLLECTION_NAME: document_chunks
       EMBEDDING_VECTOR_SIZE: 128
       LLM_PROVIDER: local_grounded
+      RERANKER_PROVIDER: local_keyword
       UPLOAD_STORAGE_DIR: /app/storage/uploads
     ports:
       - "8000:8000"

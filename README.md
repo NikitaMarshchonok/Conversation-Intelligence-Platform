@@ -179,6 +179,13 @@ The ask response includes:
 - `answer`
 - `citations[]`
 - `supporting_results[]`
+- `retrieved_order[]`
+- `reranked_order[]`
+
+Reranking baseline:
+- uses retrieved top-k candidates only
+- applies a local keyword-based reranker
+- preserves the same chunk references (only order changes)
 
 ## Environment
 
@@ -187,7 +194,6 @@ Copy `backend/.env.example` to `backend/.env` for local overrides (optional when
 ## Current scope boundaries
 
 - No frontend yet
-- No reranking yet
 - No feedback/metrics yet
 - No PDF/DOCX/XLSX parsing yet
 - Qdrant is used only for document chunk indexing in this phase

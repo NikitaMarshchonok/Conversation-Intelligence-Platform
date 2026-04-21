@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     qdrant_collection_name: str = "document_chunks"
     embedding_vector_size: int = 128
     llm_provider: str = "local_grounded"
+    reranker_provider: str = "local_keyword"
     upload_storage_dir: str = "./storage/uploads"
 
     model_config = SettingsConfigDict(
