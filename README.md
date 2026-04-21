@@ -24,6 +24,8 @@ Phase 1 foundation baseline for a production-style Conversation Intelligence Pla
   - `GET /documents/{id}/index-status`
   - `POST /search`
   - `POST /ask`
+  - `GET /ask-runs`
+  - `GET /ask-runs/{id}`
 
 ## Local run
 
@@ -186,6 +188,38 @@ Reranking baseline:
 - uses retrieved top-k candidates only
 - applies a local keyword-based reranker
 - preserves the same chunk references (only order changes)
+
+### 9) Minimal evaluation persistence flow check
+
+Every `/ask` call now persists an ask run and citations.
+
+List ask runs:
+
+```bash
+curl "http://localhost:8000/ask-runs?offset=0&limit=20"
+```
+
+Filter ask runs by project:
+
+```bash
+curl "http://localhost:8000/ask-runs?offset=0&limit=20&project_id=<PROJECT_ID>"
+```
+
+Get ask run details:
+
+```bash
+curl "http://localhost:8000/ask-runs/<ASK_RUN_ID>"
+```
+
+Stored ask-run fields include:
+- `query`
+- `answer`
+- `status`
+- `latency_ms`
+- `retrieved_chunk_ids`
+- `reranked_chunk_ids`
+- `cited_chunk_ids`
+- `citations[]`
 
 ## Environment
 

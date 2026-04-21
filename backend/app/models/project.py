@@ -23,3 +23,4 @@ class Project(Base):
     )
 
     documents = relationship("Document", back_populates="project", cascade="all, delete-orphan")
+    ask_runs = relationship("AskRun", back_populates="project", cascade="all, delete-orphan")
