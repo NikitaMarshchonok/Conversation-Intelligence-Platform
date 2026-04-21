@@ -28,4 +28,5 @@ class AskRun(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     citations = relationship("AskRunCitation", back_populates="ask_run", cascade="all, delete-orphan")
+    feedback_items = relationship("AskRunFeedback", back_populates="ask_run", cascade="all, delete-orphan")
     project = relationship("Project", back_populates="ask_runs")

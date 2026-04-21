@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AskRunCitationRead(BaseModel):
@@ -33,3 +33,18 @@ class AskRunListItemRead(BaseModel):
 
 class AskRunRead(AskRunListItemRead):
     citations: list[AskRunCitationRead]
+
+
+class AskRunFeedbackCreate(BaseModel):
+    rating: int = Field(ge=1, le=5)
+    comment: str | None = None
+
+
+class AskRunFeedbackRead(BaseModel):
+    id: UUID
+    ask_run_id: UUID
+    rating: int
+    comment: str | None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

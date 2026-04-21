@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models.ask_run import AskRun
 from app.models.ask_run_citation import AskRunCitation
+from app.models.ask_run_feedback import AskRunFeedback
 from app.schemas.ask import AskCitation
+from app.schemas.ask_run import AskRunFeedbackCreate
 
 
 class AskRunsService:
@@ -71,3 +73,23 @@ class AskRunsService:
             .options(selectinload(AskRun.citations))
         )
         return db.scalar(stmt)
+
+    @staticmethod
+    def create_feedback(
+        db: Session,
+        ask_run_id: UUID,
+        payload: AskRunFeedbackCreate,
+    ) -> AskRunFeedback:
+        ask_run = db.get(AskRun, ask_run_id)
+        if ask_run is None:
+            raise ValueError("Ask run not found")
+
+        feedback = AskRunFeedback(
+            ask_run_id=ask_run_id,
+            rating=payload.rating,
+            comment=payload.comment,
+        )
+        db.add(feedback)
+        db.commit()
+        db.refresh(feedback)
+        return feedback

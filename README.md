@@ -26,6 +26,7 @@ Phase 1 foundation baseline for a production-style Conversation Intelligence Pla
   - `POST /ask`
   - `GET /ask-runs`
   - `GET /ask-runs/{id}`
+  - `POST /ask-runs/{id}/feedback`
 
 ## Local run
 
@@ -220,6 +221,23 @@ Stored ask-run fields include:
 - `reranked_chunk_ids`
 - `cited_chunk_ids`
 - `citations[]`
+
+### 10) Minimal feedback persistence flow check
+
+Submit feedback for an ask run:
+
+```bash
+curl -X POST "http://localhost:8000/ask-runs/<ASK_RUN_ID>/feedback" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rating": 4,
+    "comment": "Good grounded answer with useful citations."
+  }'
+```
+
+Feedback payload supports:
+- `rating` (1..5)
+- optional `comment`
 
 ## Environment
 

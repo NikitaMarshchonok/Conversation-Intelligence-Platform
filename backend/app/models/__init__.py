@@ -1,7 +1,8 @@
 from app.models.ask_run import AskRun
 from app.models.ask_run_citation import AskRunCitation
+from app.models.ask_run_feedback import AskRunFeedback
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
 from app.models.project import Project
 
-__all__ = ["Project", "Document", "DocumentChunk", "AskRun", "AskRunCitation"]
+__all__ = ["Project", "Document", "DocumentChunk", "AskRun", "AskRunCitation", "AskRunFeedback"]
