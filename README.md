@@ -27,6 +27,7 @@ Phase 1 foundation baseline for a production-style Conversation Intelligence Pla
   - `GET /ask-runs`
   - `GET /ask-runs/{id}`
   - `POST /ask-runs/{id}/feedback`
+  - `GET /metrics/qa`
 
 ## Local run
 
@@ -239,6 +240,33 @@ Feedback payload supports:
 - `rating` (1..5)
 - optional `comment`
 
+### 11) Minimal QA metrics flow check
+
+Get overall QA metrics:
+
+```bash
+curl "http://localhost:8000/metrics/qa"
+```
+
+Filter metrics by project:
+
+```bash
+curl "http://localhost:8000/metrics/qa?project_id=<PROJECT_ID>"
+```
+
+Filter metrics by date range (ISO-8601):
+
+```bash
+curl "http://localhost:8000/metrics/qa?start_date=2026-04-01T00:00:00Z&end_date=2026-04-30T23:59:59Z"
+```
+
+Metrics response includes:
+- `total_ask_runs`
+- `failed_ask_runs`
+- `avg_latency_ms`
+- `feedback_count`
+- `avg_rating`
+
 ## Environment
 
 Copy `backend/.env.example` to `backend/.env` for local overrides (optional when using default compose values).
@@ -246,6 +274,6 @@ Copy `backend/.env.example` to `backend/.env` for local overrides (optional when
 ## Current scope boundaries
 
 - No frontend yet
-- No feedback/metrics yet
+- No metrics dashboard yet
 - No PDF/DOCX/XLSX parsing yet
 - Qdrant is used only for document chunk indexing in this phase
