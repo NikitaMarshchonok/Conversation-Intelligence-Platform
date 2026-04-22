@@ -28,6 +28,7 @@ Phase 1 foundation baseline for a production-style Conversation Intelligence Pla
   - `GET /ask-runs/{id}`
   - `POST /ask-runs/{id}/feedback`
   - `GET /metrics/qa`
+  - `POST /conversations/{id}/analyze`
 
 ## Local run
 
@@ -267,6 +268,25 @@ Metrics response includes:
 - `feedback_count`
 - `avg_rating`
 
+### 12) Minimal conversation analysis flow check
+
+Run baseline analysis for a conversation (current baseline uses processed document id as conversation id):
+
+```bash
+curl -X POST "http://localhost:8000/conversations/<DOCUMENT_ID>/analyze" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "overwrite_existing": true
+  }'
+```
+
+Analysis output includes:
+- `intent` (billing/cancellation/complaint/support/unknown)
+- `sentiment_label` (positive/neutral/negative)
+- `frustration_score` (0..1)
+- `compliance_flags[]`
+- `evidence_chunk_ids` and per-flag `evidence_chunk_ids`
+
 ## Environment
 
 Copy `backend/.env.example` to `backend/.env` for local overrides (optional when using default compose values).
@@ -276,4 +296,5 @@ Copy `backend/.env.example` to `backend/.env` for local overrides (optional when
 - No frontend yet
 - No metrics dashboard yet
 - No PDF/DOCX/XLSX parsing yet
+- No agent scorecards yet
 - Qdrant is used only for document chunk indexing in this phase

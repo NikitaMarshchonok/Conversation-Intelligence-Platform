@@ -5,7 +5,16 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.config import get_settings
 from app.db.base import Base
-from app.models import ask_run, ask_run_citation, ask_run_feedback, document, document_chunk, project  # noqa: F401
+from app.models import (  # noqa: F401
+    ask_run,
+    ask_run_citation,
+    ask_run_feedback,
+    compliance_flag,
+    conversation_insight,
+    document,
+    document_chunk,
+    project,
+)
 
 config = context.config
 settings = get_settings()
