@@ -10,6 +10,7 @@ from app.models import (  # noqa: F401
     ask_run_citation,
     ask_run_feedback,
     compliance_flag,
+    conversation,
     conversation_insight,
     document,
     document_chunk,

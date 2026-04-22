@@ -4,8 +4,10 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.schemas.conversation import ConversationRead
 from app.schemas.document import DocumentRead
 from app.schemas.project import ProjectCreate, ProjectRead
+from app.services.conversations_service import ConversationsService
 from app.services.documents_service import DocumentsService
 from app.services.projects_service import ProjectsService
 
@@ -48,3 +50,11 @@ def list_project_documents(project_id: UUID, db: Session = Depends(get_db)) -> l
     if project is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     return DocumentsService.list_project_documents(db, project_id)
+
+
+@router.get("/{project_id}/conversations", response_model=list[ConversationRead])
+def list_project_conversations(project_id: UUID, db: Session = Depends(get_db)) -> list[ConversationRead]:
+    project = ProjectsService.get_project_by_id(db, project_id)
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    return ConversationsService.list_project_conversations(db, project_id)

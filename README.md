@@ -28,6 +28,8 @@ Phase 1 foundation baseline for a production-style Conversation Intelligence Pla
   - `GET /ask-runs/{id}`
   - `POST /ask-runs/{id}/feedback`
   - `GET /metrics/qa`
+  - `GET /projects/{id}/conversations`
+  - `GET /conversations/{id}`
   - `POST /conversations/{id}/analyze`
 
 ## Local run
@@ -270,10 +272,22 @@ Metrics response includes:
 
 ### 12) Minimal conversation analysis flow check
 
-Run baseline analysis for a conversation (current baseline uses processed document id as conversation id):
+List conversations for a project:
 
 ```bash
-curl -X POST "http://localhost:8000/conversations/<DOCUMENT_ID>/analyze" \
+curl "http://localhost:8000/projects/<PROJECT_ID>/conversations"
+```
+
+Get one conversation:
+
+```bash
+curl "http://localhost:8000/conversations/<CONVERSATION_ID>"
+```
+
+Run baseline analysis for a conversation:
+
+```bash
+curl -X POST "http://localhost:8000/conversations/<CONVERSATION_ID>/analyze" \
   -H "Content-Type: application/json" \
   -d '{
     "overwrite_existing": true
@@ -286,6 +300,9 @@ Analysis output includes:
 - `frustration_score` (0..1)
 - `compliance_flags[]`
 - `evidence_chunk_ids` and per-flag `evidence_chunk_ids`
+
+Backward-compatible bridge:
+- legacy calls passing a `document_id` to `/conversations/{id}/analyze` are still supported for incremental migration.
 
 ## Environment
 

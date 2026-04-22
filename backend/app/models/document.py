@@ -40,10 +40,4 @@ class Document(Base):
 
     project = relationship("Project", back_populates="documents")
     chunks = relationship("DocumentChunk", back_populates="document", cascade="all, delete-orphan")
-    conversation_insight = relationship(
-        "ConversationInsight",
-        back_populates="conversation",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
-    compliance_flags = relationship("ComplianceFlag", back_populates="conversation", cascade="all, delete-orphan")
+    conversation = relationship("Conversation", back_populates="document", uselist=False)

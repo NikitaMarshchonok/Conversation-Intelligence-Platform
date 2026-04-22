@@ -14,7 +14,7 @@ class ConversationInsight(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     conversation_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("documents.id", ondelete="CASCADE"),
+        ForeignKey("conversations.id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
         index=True,
@@ -31,4 +31,4 @@ class ConversationInsight(Base):
         onupdate=func.now(),
     )
 
-    conversation = relationship("Document", back_populates="conversation_insight")
+    conversation = relationship("Conversation", back_populates="insight")

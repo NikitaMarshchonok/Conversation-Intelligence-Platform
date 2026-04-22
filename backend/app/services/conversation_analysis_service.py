@@ -5,6 +5,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.models.compliance_flag import ComplianceFlag
+from app.models.conversation import Conversation
 from app.models.conversation_insight import ConversationInsight
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
@@ -33,13 +34,16 @@ class ConversationAnalysisService:
         conversation_id: UUID,
         payload: ConversationAnalyzeRequest,
     ) -> ConversationAnalyzeResponse:
-        conversation = db.get(Document, conversation_id)
-        if conversation is None:
+        conversation, source_document = ConversationAnalysisService._resolve_conversation_and_document(
+            db=db,
+            conversation_id=conversation_id,
+        )
+        if conversation is None or source_document is None:
             raise ValueError("Conversation not found")
 
         chunks_stmt = (
             select(DocumentChunk)
-            .where(DocumentChunk.document_id == conversation_id)
+            .where(DocumentChunk.document_id == source_document.id)
             .order_by(DocumentChunk.chunk_index.asc())
         )
         chunks = list(db.scalars(chunks_stmt).all())
@@ -47,8 +51,8 @@ class ConversationAnalysisService:
             raise ValueError("Conversation has no chunks. Process the document first.")
 
         if payload.overwrite_existing:
-            db.execute(delete(ComplianceFlag).where(ComplianceFlag.conversation_id == conversation_id))
-            db.execute(delete(ConversationInsight).where(ConversationInsight.conversation_id == conversation_id))
+            db.execute(delete(ComplianceFlag).where(ComplianceFlag.conversation_id == conversation.id))
+            db.execute(delete(ConversationInsight).where(ConversationInsight.conversation_id == conversation.id))
 
         combined_text = "\n".join(chunk.content for chunk in chunks).lower()
         intent, intent_evidence = ConversationAnalysisService._detect_intent(chunks)
@@ -56,7 +60,7 @@ class ConversationAnalysisService:
         frustration_score = ConversationAnalysisService._compute_frustration_score(combined_text)
 
         insight = ConversationInsight(
-            conversation_id=conversation_id,
+            conversation_id=conversation.id,
             intent=intent,
             sentiment_label=sentiment_label,
             frustration_score=frustration_score,
@@ -68,7 +72,7 @@ class ConversationAnalysisService:
         for item in compliance_results:
             db.add(
                 ComplianceFlag(
-                    conversation_id=conversation_id,
+                    conversation_id=conversation.id,
                     flag_type=item.flag_type,
                     is_triggered=item.is_triggered,
                     evidence_chunk_ids=item.evidence_chunk_ids,
@@ -80,7 +84,7 @@ class ConversationAnalysisService:
         db.refresh(insight)
 
         return ConversationAnalyzeResponse(
-            conversation_id=conversation_id,
+            conversation_id=conversation.id,
             intent=insight.intent,
             sentiment_label=insight.sentiment_label,
             frustration_score=insight.frustration_score,
@@ -88,6 +92,36 @@ class ConversationAnalysisService:
             compliance_flags=compliance_results,
             analyzed_at=datetime.now(timezone.utc),
         )
+
+    @staticmethod
+    def _resolve_conversation_and_document(db: Session, conversation_id: UUID) -> tuple[Conversation | None, Document | None]:
+        conversation = db.get(Conversation, conversation_id)
+        if conversation is not None:
+            if conversation.document_id is None:
+                raise ValueError("Conversation is not mapped to a source document yet")
+            document = db.get(Document, conversation.document_id)
+            return conversation, document
+
+        # Backward-compatible bridge: allow legacy calls that pass document_id.
+        document = db.get(Document, conversation_id)
+        if document is None:
+            return None, None
+
+        stmt = select(Conversation).where(Conversation.document_id == document.id)
+        bridged_conversation = db.scalar(stmt)
+        if bridged_conversation is None:
+            bridged_conversation = Conversation(
+                id=document.id,
+                project_id=document.project_id,
+                document_id=document.id,
+                channel="unknown",
+                title=document.original_name,
+                status="active",
+            )
+            db.add(bridged_conversation)
+            db.flush()
+
+        return bridged_conversation, document
 
     @staticmethod
     def _detect_intent(chunks: list[DocumentChunk]) -> tuple[str, list[UUID]]:

@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
+from app.models.conversation import Conversation
 from app.models.document import Document
 from app.models.project import Project
 
@@ -57,6 +58,18 @@ class DocumentsService:
             status="uploaded",
         )
         db.add(document)
+        db.flush()
+
+        db.add(
+            Conversation(
+                id=document.id,
+                project_id=project_id,
+                document_id=document.id,
+                channel="unknown",
+                title=document.original_name,
+                status="active",
+            )
+        )
         db.commit()
         db.refresh(document)
         return document
