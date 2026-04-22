@@ -15,6 +15,7 @@ Phase 1 foundation baseline for a production-style Conversation Intelligence Pla
   - `POST /projects`
   - `GET /projects/{id}`
   - `POST /projects/{id}/documents/upload`
+  - `POST /projects/{id}/conversations/upload`
   - `GET /projects/{id}/documents`
   - `GET /documents/{id}`
   - `POST /documents/{id}/process`
@@ -30,6 +31,9 @@ Phase 1 foundation baseline for a production-style Conversation Intelligence Pla
   - `GET /metrics/qa`
   - `GET /projects/{id}/conversations`
   - `GET /conversations/{id}`
+  - `POST /conversations/{id}/process`
+  - `POST /conversations/{id}/index`
+  - `POST /conversations/{id}/reindex`
   - `POST /conversations/{id}/analyze`
 
 ## Local run
@@ -78,6 +82,16 @@ Copy the returned project `id`, then upload a file:
 ```bash
 curl -X POST "http://localhost:8000/projects/<PROJECT_ID>/documents/upload" \
   -F "file=@./README.md"
+```
+
+Conversation-first upload (creates `Document` source + linked `Conversation`):
+
+```bash
+curl -X POST "http://localhost:8000/projects/<PROJECT_ID>/conversations/upload" \
+  -F "file=@./README.md" \
+  -F "channel=chat" \
+  -F "external_conversation_id=ext-123" \
+  -F "title=Customer billing issue"
 ```
 
 List project documents:
@@ -284,6 +298,15 @@ Get one conversation:
 curl "http://localhost:8000/conversations/<CONVERSATION_ID>"
 ```
 
+Conversation read response includes:
+- `id`
+- `project_id`
+- `document_id`
+- `channel`
+- `title`
+- `status`
+- `created_at`
+
 Run baseline analysis for a conversation:
 
 ```bash
@@ -303,6 +326,34 @@ Analysis output includes:
 
 Backward-compatible bridge:
 - legacy calls passing a `document_id` to `/conversations/{id}/analyze` are still supported for incremental migration.
+
+### 13) Minimal conversation pipeline proxy flow check
+
+Process via conversation-first API (delegates to document processing):
+
+```bash
+curl -X POST "http://localhost:8000/conversations/<CONVERSATION_ID>/process"
+```
+
+Index via conversation-first API (delegates to document indexing):
+
+```bash
+curl -X POST "http://localhost:8000/conversations/<CONVERSATION_ID>/index"
+```
+
+Reindex via conversation-first API:
+
+```bash
+curl -X POST "http://localhost:8000/conversations/<CONVERSATION_ID>/reindex"
+```
+
+Proxy response includes:
+- `conversation_id`
+- `document_id`
+- `action`
+- `document_status`
+- `chunk_count`
+- indexing/processing status fields
 
 ## Environment
 

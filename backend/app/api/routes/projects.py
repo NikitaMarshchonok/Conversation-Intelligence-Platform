@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -58,3 +58,25 @@ def list_project_conversations(project_id: UUID, db: Session = Depends(get_db)) 
     if project is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     return ConversationsService.list_project_conversations(db, project_id)
+
+
+@router.post("/{project_id}/conversations/upload", response_model=ConversationRead, status_code=status.HTTP_201_CREATED)
+def upload_conversation_source(
+    project_id: UUID,
+    file: UploadFile = File(...),
+    channel: str | None = Form(default=None),
+    external_conversation_id: str | None = Form(default=None),
+    title: str | None = Form(default=None),
+    db: Session = Depends(get_db),
+) -> ConversationRead:
+    try:
+        return ConversationsService.upload_conversation_source(
+            db=db,
+            project_id=project_id,
+            upload=file,
+            channel=channel,
+            external_conversation_id=external_conversation_id,
+            title=title,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc

@@ -1,10 +1,12 @@
 from uuid import UUID
 
+from fastapi import UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.conversation import Conversation
 from app.models.document import Document
+from app.services.documents_service import DocumentsService
 
 
 class ConversationsService:
@@ -37,4 +39,27 @@ class ConversationsService:
         conversation = Conversation(**conversation_kwargs)
         db.add(conversation)
         db.flush()
+        return conversation
+
+    @staticmethod
+    def upload_conversation_source(
+        db: Session,
+        project_id: UUID,
+        upload: UploadFile,
+        channel: str | None = None,
+        external_conversation_id: str | None = None,
+        title: str | None = None,
+    ) -> Conversation:
+        document = DocumentsService.create_uploaded_document(db=db, project_id=project_id, upload=upload)
+        conversation = ConversationsService.get_or_create_by_document(db=db, document=document, force_id_as_document_id=True)
+
+        if channel is not None and channel.strip():
+            conversation.channel = channel.strip().lower()
+        if external_conversation_id is not None and external_conversation_id.strip():
+            conversation.external_conversation_id = external_conversation_id.strip()
+        if title is not None and title.strip():
+            conversation.title = title.strip()
+
+        db.commit()
+        db.refresh(conversation)
         return conversation

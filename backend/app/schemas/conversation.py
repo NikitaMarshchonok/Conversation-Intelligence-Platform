@@ -16,3 +16,16 @@ class ConversationRead(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ConversationPipelineActionResponse(BaseModel):
+    conversation_id: UUID
+    document_id: UUID
+    action: str
+    document_status: str
+    chunk_count: int
+    processed_at: datetime | None
+    processing_error: str | None
+    is_indexed: bool
+    indexed_at: datetime | None
+    indexing_error: str | None
