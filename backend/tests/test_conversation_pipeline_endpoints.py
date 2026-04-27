@@ -34,7 +34,12 @@ def _assert_common_response_shape(data: dict, expected_action: str) -> None:
     assert "indexing_error" in data
 
 
-def test_process_conversation_success_returns_conversation_oriented_payload(client, db_session, monkeypatch) -> None:
+def test_process_conversation_success_returns_conversation_oriented_payload(
+    client,
+    db_session,
+    monkeypatch,
+    sample_conversation_with_document,
+) -> None:
     response_payload = _build_payload(action="process")
     called: dict = {}
 
@@ -44,7 +49,7 @@ def test_process_conversation_success_returns_conversation_oriented_payload(clie
         return response_payload
 
     monkeypatch.setattr(ConversationPipelineService, "process_conversation", _fake_process_conversation)
-    target_conversation_id = uuid4()
+    target_conversation_id = sample_conversation_with_document.conversation_id
 
     response = client.post(f"/conversations/{target_conversation_id}/process")
 
@@ -55,7 +60,12 @@ def test_process_conversation_success_returns_conversation_oriented_payload(clie
     assert called["conversation_id"] == target_conversation_id
 
 
-def test_index_conversation_success_returns_conversation_oriented_payload(client, db_session, monkeypatch) -> None:
+def test_index_conversation_success_returns_conversation_oriented_payload(
+    client,
+    db_session,
+    monkeypatch,
+    sample_conversation_with_document,
+) -> None:
     response_payload = _build_payload(action="index")
     called: dict = {}
 
@@ -65,7 +75,7 @@ def test_index_conversation_success_returns_conversation_oriented_payload(client
         return response_payload
 
     monkeypatch.setattr(ConversationPipelineService, "index_conversation", _fake_index_conversation)
-    target_conversation_id = uuid4()
+    target_conversation_id = sample_conversation_with_document.conversation_id
 
     response = client.post(f"/conversations/{target_conversation_id}/index")
 
@@ -77,7 +87,12 @@ def test_index_conversation_success_returns_conversation_oriented_payload(client
     assert called["conversation_id"] == target_conversation_id
 
 
-def test_reindex_conversation_success_returns_conversation_oriented_payload(client, db_session, monkeypatch) -> None:
+def test_reindex_conversation_success_returns_conversation_oriented_payload(
+    client,
+    db_session,
+    monkeypatch,
+    sample_conversation_with_document,
+) -> None:
     response_payload = _build_payload(action="reindex")
     called: dict = {}
 
@@ -87,7 +102,7 @@ def test_reindex_conversation_success_returns_conversation_oriented_payload(clie
         return response_payload
 
     monkeypatch.setattr(ConversationPipelineService, "reindex_conversation", _fake_reindex_conversation)
-    target_conversation_id = uuid4()
+    target_conversation_id = sample_conversation_with_document.conversation_id
 
     response = client.post(f"/conversations/{target_conversation_id}/reindex")
 
@@ -110,6 +125,7 @@ def test_reindex_conversation_success_returns_conversation_oriented_payload(clie
 def test_proxy_endpoints_return_clean_400_for_expected_pipeline_failures(
     client,
     monkeypatch,
+    sample_conversation_without_document,
     path_suffix: str,
     service_method: str,
     error_message: str,
@@ -119,7 +135,9 @@ def test_proxy_endpoints_return_clean_400_for_expected_pipeline_failures(
         raise ValueError(error_message)
 
     monkeypatch.setattr(ConversationPipelineService, service_method, _raise_value_error)
-    conversation_id = uuid4()
+    conversation_id = (
+        uuid4() if error_message == "Conversation not found" else sample_conversation_without_document.conversation_id
+    )
 
     response = client.post(f"/conversations/{conversation_id}/{path_suffix}")
 
