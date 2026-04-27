@@ -355,6 +355,16 @@ Proxy response includes:
 - `chunk_count`
 - indexing/processing status fields
 
+### 14) Run backend tests
+
+Install backend dependencies and run pytest from the backend directory:
+
+```bash
+cd backend
+pip install -r requirements.txt
+pytest
+```
+
 ## Environment
 
 Copy `backend/.env.example` to `backend/.env` for local overrides (optional when using default compose values).
