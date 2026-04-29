@@ -1,0 +1,24 @@
+name: Backend Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend-pytest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend dependencies
+        run: python -m pip install -r backend/requirements.txt
+
+      - name: Run backend tests
+        run: PYTHONPATH=backend python -m pytest backend/tests -q
